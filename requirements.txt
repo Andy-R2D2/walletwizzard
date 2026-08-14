@@ -11,3 +11,4 @@ scikit-learn==1.5.1
 joblib==1.4.2
 openai==1.40.0
 reportlab==4.2.2
+gunicorn==22.0.0
