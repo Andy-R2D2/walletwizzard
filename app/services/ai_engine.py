@@ -3,7 +3,11 @@ from openai import OpenAI
 from app.services.rules        import get_monthly_summary, get_savings_forecast
 from app.services.health_score import compute_health_score
 
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+def get_client():
+    key = os.getenv('OPENAI_API_KEY')
+    if not key:
+        raise ValueError('OPENAI_API_KEY is not set.')
+    return OpenAI(api_key=key)
 
 
 def build_context(user_id):
@@ -91,7 +95,7 @@ Write a monthly financial summary with these 4 sections:
 Keep the whole response under 180 words. Be specific with numbers from their data.
 """
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model='gpt-4o-mini',
         messages=[
             {'role': 'system', 'content': 'You are WalletWizzard, a concise and friendly personal finance AI.'},
@@ -123,7 +127,7 @@ Start with ✦ and speak directly to the user.
 No hashtags, no emojis except ✦.
 """
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model='gpt-4o-mini',
         messages=[
             {'role': 'user', 'content': prompt}
@@ -155,7 +159,7 @@ USER FINANCIAL DATA:
 USER QUESTION: {question}
 """
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model='gpt-4o-mini',
         messages=[
             {'role': 'system', 'content': 'You are WalletWizzard, a concise personal finance AI advisor.'},
