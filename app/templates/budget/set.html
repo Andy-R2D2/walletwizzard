@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Set Budget — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:460px;">
+  <div class="page-header">
+    <h1>Set budget — {{ category }}</h1>
+  </div>
+
+  <p style="color:#8FA3B0;font-size:13px;margin-bottom:1.25rem;">
+    This budget will be <strong style="color:#fff;">locked for {{ now.strftime('%B %Y') }}</strong>
+    and cannot be changed until next month.
+  </p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="POST" class="form-card">
+    <div class="field">
+      <label>Planned amount for {{ category }} ($)</label>
+      <input type="number" name="planned" step="0.01" min="0.01"
+             placeholder="e.g. 300.00" required autofocus/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:.5rem;">
+      <button type="submit" class="btn-auth" style="flex:1;">Lock budget ✦</button>
+      <a href="{{ url_for('budget.index') }}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

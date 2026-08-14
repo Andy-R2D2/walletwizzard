@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}WalletWizzard — Smart Finance, Simplified{% endblock %}
+{% block content %}
+<div class="landing">
+
+  <nav class="landing-nav">
+    <div class="logo-nm">Wallet<span>Wizzard</span></div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="{{ url_for('auth.login') }}"    class="btn-ghost">Sign in</a>
+      <a href="{{ url_for('auth.register') }}" class="btn-landing">Get started free</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">✦ Your finances, enchanted</div>
+    <h1>Know exactly where<br>your money <span>goes.</span></h1>
+    <p>Track spending, set goals, and get a live financial health score — all in one place. No spreadsheets, no guesswork.</p>
+    <a href="{{ url_for('auth.register') }}" class="btn-landing" style="font-size:15px;padding:14px 36px;">
+      Cast your first spell — it's free ✦
+    </a>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">10k+</div><div class="stat-lbl">Active users</div></div>
+      <div class="stat-div"></div>
+      <div class="stat-item"><div class="stat-num">$2.4M</div><div class="stat-lbl">Saved by users</div></div>
+      <div class="stat-div"></div>
+      <div class="stat-item"><div class="stat-num">9 AI</div><div class="stat-lbl">Features built-in</div></div>
+      <div class="stat-div"></div>
+      <div class="stat-item"><div class="stat-num">Real-time</div><div class="stat-lbl">Spending alerts</div></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section">
+    <div class="section-eyebrow">What you get</div>
+    <div class="section-title">Everything you need to stay on top</div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-name">📊 Spending analysis</div>
+        <div class="feat-desc">Visualize patterns across all categories automatically</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-name">🎯 Goal tracking</div>
+        <div class="feat-desc">Set a target and see exactly when you'll reach it</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-name">📈 Savings forecast</div>
+        <div class="feat-desc">See how much you'll have saved 12 months from now</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-name">🔔 Smart alerts</div>
+        <div class="feat-desc">Get notified the moment something unusual shows up</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-name">💡 Personalized tips</div>
+        <div class="feat-desc">Recommendations built around your actual spending habits</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-name">❤️ Health score</div>
+        <div class="feat-desc">One live score that tells you how you're really doing</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Preview teaser -->
+  <section style="padding:0 2rem 3rem;max-width:900px;margin:0 auto;">
+    <div class="section-eyebrow">Live preview</div>
+    <div class="section-title">See your money clearly</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+      <!-- Health score teaser -->
+      <div style="background:#141F2B;border:.5px solid rgba(99,217,180,.18);border-radius:12px;padding:1.25rem;text-align:center;">
+        <div style="font-size:12px;color:#8FA3B0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem;">Financial health score</div>
+        <svg width="110" height="110" viewBox="0 0 110 110" style="display:block;margin:0 auto 10px;">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(99,217,180,0.12)" stroke-width="10"/>
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#63D9B4" stroke-width="10"
+            stroke-dasharray="289" stroke-dashoffset="69"
+            stroke-linecap="round" transform="rotate(-90 55 55)"/>
+          <text x="55" y="50" text-anchor="middle" font-size="22" font-weight="600" fill="#FFFFFF" font-family="sans-serif">76</text>
+          <text x="55" y="67" text-anchor="middle" font-size="11" fill="#63D9B4" font-family="sans-serif">/100</text>
+        </svg>
+        <div style="font-size:12px;color:#63D9B4;margin-bottom:12px;">Good — keep improving</div>
+        <div style="background:rgba(255,255,255,.08);border-radius:20px;height:9px;overflow:hidden;">
+          <div style="background:#63D9B4;height:100%;width:76%;border-radius:20px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:#8FA3B0;">
+          <span>0</span><span>76 / 100</span>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Alert card -->
+        <div style="background:rgba(239,68,68,.08);border:.5px solid rgba(239,68,68,.25);border-radius:10px;padding:1rem;">
+          <div style="color:#FCA5A5;font-size:11px;font-weight:500;margin-bottom:5px;">⚠ Spending alert</div>
+          <div style="color:#C5D3DB;font-size:12px;line-height:1.55;">Unusually high Entertainment spending detected this month (+240%). Consider reviewing your subscriptions.</div>
+        </div>
+
+        <!-- Goal card -->
+        <div style="background:#141F2B;border:.5px solid rgba(99,217,180,.18);border-radius:10px;padding:1rem;">
+          <div style="font-size:11px;color:#8FA3B0;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Savings goal</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:500;color:#C5D3DB;">Car — $6,000</span>
+            <span style="font-size:12px;color:#63D9B4;">13 months</span>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:20px;height:7px;overflow:hidden;margin-bottom:5px;">
+            <div style="background:#63D9B4;height:100%;width:38%;border-radius:20px;"></div>
+          </div>
+          <div style="font-size:11px;color:#8FA3B0;">$2,280 saved so far</div>
+        </div>
+
+        <!-- AI tip -->
+        <div style="background:rgba(99,217,180,.05);border:.5px solid rgba(99,217,180,.2);border-radius:10px;padding:1rem;">
+          <div style="color:#63D9B4;font-size:11px;font-weight:500;margin-bottom:5px;">✦ Wizzard AI tip</div>
+          <div style="color:#C5D3DB;font-size:12px;line-height:1.55;">Reducing restaurant spending by 15% could save you $1,080 annually.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Start building better money habits today</h2>
+    <p>Free to get started. No credit card required. Powered by AI, built for real life.</p>
+    <a href="{{ url_for('auth.register') }}" class="btn-landing" style="font-size:14px;padding:13px 32px;">
+      Create your free account ✦
+    </a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <span>Wallet<span style="color:#63D9B4;">Wizzard</span> — Smart finance, simplified</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Floating sparkles -->
+<canvas id="sparkle-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.4;" aria-hidden="true"></canvas>
+
+<script>
+const canvas = document.getElementById('sparkle-canvas');
+const ctx    = canvas.getContext('2d');
+let W, H, stars = [];
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const SYMS = ['✦','✧','⋆','·','✦'];
+for (let i = 0; i < 50; i++) {
+  stars.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    size: Math.random() * 9 + 4,
+    speed: Math.random() * 0.3 + 0.05,
+    dir: Math.random() * 0.4 - 0.2,
+    sym: SYMS[Math.floor(Math.random() * SYMS.length)],
+    phase: Math.random() * Math.PI * 2
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  stars.forEach(s => {
+    s.y -= s.speed;
+    s.x += s.dir;
+    s.phase += 0.018;
+    if (s.y < -20) { s.y = H + 10; s.x = Math.random() * W; }
+    ctx.globalAlpha = (Math.sin(s.phase) * 0.4 + 0.6) * 0.5;
+    ctx.fillStyle = '#63D9B4';
+    ctx.font = s.size + 'px serif';
+    ctx.fillText(s.sym, s.x, s.y);
+  });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Goals — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Savings goals</h1>
+    {% if goals|selectattr('achieved', 'equalto', false)|list|length < max_goals %}
+      <a href="{{ url_for('goal.add') }}" class="btn-primary">+ Add goal</a>
+    {% endif %}
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if goals %}
+    <div class="goals-grid">
+      {% for g in goals %}
+      <div class="goal-card-full {% if g.achieved %}achieved{% endif %}">
+        <div class="goal-card-top">
+          <div class="goal-card-name">{{ g.name }}</div>
+          {% if g.achieved %}
+            <span class="badge-ok">Achieved ✦</span>
+          {% else %}
+            <span class="goal-pct-badge">{{ g.progress_pct }}%</span>
+          {% endif %}
+        </div>
+
+        <div class="goal-amounts">
+          <span class="green">${{ "%.2f"|format(g.saved_amount) }}</span>
+          <span class="muted"> / ${{ "%.2f"|format(g.target_amount) }}</span>
+        </div>
+
+        <div class="goal-bar-wrap">
+          <div class="goal-bar-fill" style="width:{{ g.progress_pct }}%;"></div>
+        </div>
+
+        <div class="goal-meta-row">
+          <span>Monthly target: <strong>${{ "%.2f"|format(g.monthly_target) }}</strong></span>
+          {% if not g.achieved %}
+            <span>Est. completion:
+              <strong>
+                {% if g.estimated_months %}{{ g.estimated_months }} months{% else %}—{% endif %}
+              </strong>
+            </span>
+          {% endif %}
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:1rem;">
+          <a href="{{ url_for('goal.edit', id=g.id) }}" class="btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('goal.delete', id=g.id) }}" style="display:inline;">
+            <button type="submit" class="btn-sm danger" onclick="return confirm('Delete this goal?')">Delete</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No goals yet. <a href="{{ url_for('goal.add') }}">Add your first goal</a>.</div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;"><a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a></div>
+</div>
+{% endblock %}

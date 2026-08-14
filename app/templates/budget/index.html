@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Monthly Budget — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Monthly budget — {{ now.strftime('%B %Y') }}</h1>
+  </div>
+
+  <p style="color:#8FA3B0;font-size:13px;margin-bottom:1.5rem;">
+    Set your planned spending per category once per month. Budgets are locked until next month.
+    {% if monthly_income > 0 %}Monthly income: <strong style="color:#63D9B4;">${{ "%.2f"|format(monthly_income) }}</strong>{% endif %}
+  </p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="budget-grid">
+    {% for name, icon in all_categories %}
+      {% set b = budget_map.get(name) %}
+      <div class="budget-cat-card {% if b %}set{% endif %}">
+        <div class="bcc-icon">{{ icon }}</div>
+        <div class="bcc-name">{{ name }}</div>
+        {% if b %}
+          <div class="bcc-amount green">${{ "%.2f"|format(b.planned) }}</div>
+          <div class="bcc-status">✓ Locked for {{ now.strftime('%B') }}</div>
+        {% else %}
+          <div class="bcc-amount" style="color:#8FA3B0;">Not set</div>
+          <a href="{{ url_for('budget.set_budget', category=name) }}" class="btn-sm" style="margin-top:.5rem;display:inline-block;">Set budget</a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a>
+  </div>
+</div>
+{% endblock %}

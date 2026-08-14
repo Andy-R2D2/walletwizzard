@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — WalletWizzard{% endblock %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+
+  <!-- greeting -->
+  <div class="greeting">
+    <h1>Good day, <span>{{ user.username }}</span> ✦</h1>
+    <p>Here's your financial snapshot for {{ now.strftime('%B %Y') }}</p>
+  </div>
+
+  <!-- metric cards -->
+  <div class="metric-row">
+    <div class="metric-card">
+      <div class="mc-label">Monthly income</div>
+      <div class="mc-val green">${{ "%.2f"|format(summary.total_income) }}</div>
+      <div class="mc-sub">{{ summary.income_count }} record(s)</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Total expenses</div>
+      <div class="mc-val {% if summary.total_expense > summary.total_planned and summary.total_planned > 0 %}red{% else %}white{% endif %}">
+        ${{ "%.2f"|format(summary.total_expense) }}
+      </div>
+      <div class="mc-sub">Planned: ${{ "%.2f"|format(summary.total_planned) }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Saved this month</div>
+      <div class="mc-val {% if summary.savings < 0 %}red{% else %}green{% endif %}">
+        ${{ "%.2f"|format(summary.savings) }}
+      </div>
+      <div class="mc-sub">Rate: {{ summary.savings_rate }}%</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Subscriptions</div>
+      <div class="mc-val">${{ "%.2f"|format(summary.sub_cost) }}/mo</div>
+      <div class="mc-sub">{{ summary.sub_count }} active</div>
+    </div>
+  </div>
+
+  <!-- mid grid: chart + health score -->
+  <div class="mid-grid">
+
+    <!-- spending chart -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Spending vs plan — this month</div>
+        <div class="card-tag">{{ now.strftime('%B %Y') }}</div>
+      </div>
+      {% if summary.by_category %}
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#1A4A5C;border:1px solid #63D9B4;"></span>Planned</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#63D9B4;"></span>Actual</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;">
+          <canvas id="spendChart"></canvas>
+        </div>
+      {% else %}
+        <div class="empty-state">No expense data yet. <a href="{{ url_for('expense.add') }}">Add an expense</a>.</div>
+      {% endif %}
+    </div>
+
+    <!-- health score — Phase 10 ML model -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Financial health score</div>
+        <div class="card-tag" style="color:{{ health.color }};border-color:{{ health.color }};">
+          {{ health.label }}
+        </div>
+      </div>
+      <div class="health-wrap">
+        <div class="score-ring-wrap">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(99,217,180,0.12)" stroke-width="10"/>
+            <circle cx="55" cy="55" r="46" fill="none" stroke="{{ health.color }}" stroke-width="10"
+              stroke-dasharray="289"
+              stroke-dashoffset="{{ 289 - (289 * health.score / 100)|int }}"
+              stroke-linecap="round" transform="rotate(-90 55 55)"/>
+            <text x="55" y="50" text-anchor="middle" font-size="22" font-weight="600" fill="#FFFFFF" font-family="Syne,sans-serif">{{ health.score }}</text>
+            <text x="55" y="67" text-anchor="middle" font-size="11" fill="#63D9B4" font-family="DM Sans,sans-serif">/100</text>
+          </svg>
+        </div>
+        <div class="score-details">
+          {% for factor in health.factors %}
+          <div class="factor-row" title="{{ factor.note }}">
+            <span class="factor-name">{{ factor.name }}</span>
+            <div class="factor-track">
+              <div class="factor-fill" style="width:{{ factor.score }}%;
+                background:{% if factor.score >= 70 %}#63D9B4{% elif factor.score >= 40 %}#FCD34D{% else %}#FCA5A5{% endif %};"></div>
+            </div>
+            <span style="font-size:10px;color:#8FA3B0;width:28px;text-align:right;">{{ factor.score }}</span>
+          </div>
+          {% endfor %}
+          <div style="margin-top:.85rem;">
+            <div class="bar-track">
+              <div class="bar-fill" style="width:{{ health.score }}%;background:{{ health.color }};"></div>
+            </div>
+            <div class="bar-labels"><span>0</span><span>{{ health.score }} / 100</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- bottom grid: alerts + goal insights + goals -->
+  <div class="bot-grid">
+
+    <!-- alerts + goal insights -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+
+      {% if alerts %}
+        {% for alert in alerts %}
+        <div class="alert-card">
+          <div class="alert-title">⚠ Spending alert</div>
+          <div class="alert-body">{{ alert.message }}</div>
+        </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if goal_insights %}
+        {% for insight in goal_insights %}
+        <div class="{% if insight.status == 'on_track' %}insight-card-ok{% else %}alert-card{% endif %}">
+          <div class="alert-title">{% if insight.status == 'on_track' %}✦ Goal on track{% else %}⚠ Goal delayed{% endif %}</div>
+          <div class="alert-body">{{ insight.message }}</div>
+        </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if not alerts and not goal_insights %}
+        <div class="insight-card-ok">
+          <div class="alert-title">✦ All good</div>
+          <div class="alert-body">No alerts this month. Keep it up!</div>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- goals progress -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Savings goals</div>
+        <a href="{{ url_for('goal.add') }}" class="card-tag" style="text-decoration:none;">+ Add</a>
+      </div>
+      {% if summary.goals %}
+        {% for g in summary.goals %}
+        <div class="goal-item">
+          <div class="goal-top-row">
+            <span class="goal-name">{{ g.name }}</span>
+            <span class="goal-eta">
+              {% if g.estimated_months %}{{ g.estimated_months }} mo{% else %}—{% endif %}
+            </span>
+          </div>
+          <div class="goal-track"><div class="goal-fill" style="width:{{ g.progress_pct }}%;"></div></div>
+          <div class="goal-meta">
+            <span>${{ "%.2f"|format(g.saved_amount) }} saved</span>
+            <span>{{ g.progress_pct }}% of ${{ "%.2f"|format(g.target_amount) }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">No goals yet. <a href="{{ url_for('goal.add') }}">Add one</a>.</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- AI Wizzard tip banner — Phase 12 -->
+  <div class="ai-tip-banner" id="wizTipBanner" style="margin-top:14px;display:none;">
+    <div class="alert-title">✦ Wizzard Tip</div>
+    <div class="alert-body" id="wizTipText"></div>
+  </div>
+
+  <!-- forecast chart — Phase 11 -->
+  {% if forecast %}
+  <div class="card" style="margin-top:14px;">
+    <div class="card-head">
+      <div class="card-title">12-month savings forecast</div>
+      <div class="card-tag">Projection</div>
+    </div>
+    <div style="position:relative;width:100%;height:200px;">
+      <canvas id="forecastChart"></canvas>
+    </div>
+    <div style="margin-top:.75rem;font-size:12px;color:#8FA3B0;">
+      Based on current monthly savings of
+      <strong style="color:#63D9B4;">${{ "%.2f"|format(forecast[0].monthly) }}</strong>/mo.
+      Projected total in 12 months:
+      <strong style="color:#63D9B4;">${{ "%.2f"|format(forecast[-1].cumulative) }}</strong>.
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if summary.by_category %}
+<script>
+const categories = {{ summary.by_category.keys()|list|tojson }};
+const actuals    = {{ summary.by_category.values()|list|tojson }};
+const planned    = {{ planned_by_category|tojson }};
+
+new Chart(document.getElementById('spendChart'), {
+  type: 'bar',
+  data: {
+    labels: categories,
+    datasets: [
+      {
+        label: 'Planned',
+        data: categories.map(c => planned[c] || 0),
+        backgroundColor: 'rgba(26,74,92,0.85)',
+        borderColor: '#63D9B4',
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false
+      },
+      {
+        label: 'Actual',
+        data: actuals,
+        backgroundColor: '#63D9B4',
+        borderRadius: 4,
+        borderSkipped: false
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: c => ' $' + c.parsed.y }}
+    },
+    scales: {
+      x: {
+        ticks: { color: '#8FA3B0', font: { size: 11 }},
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        border: { color: 'rgba(255,255,255,0.04)' }
+      },
+      y: {
+        ticks: { color: '#8FA3B0', font: { size: 11 }, callback: v => '$' + v },
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        border: { color: 'rgba(255,255,255,0.04)' }
+      }
+    }
+  }
+});
+</script>
+{% endif %}
+
+{% if forecast %}
+<script>
+const forecastLabels = {{ forecast|map(attribute='month')|list|tojson }};
+const forecastData   = {{ forecast|map(attribute='cumulative')|list|tojson }};
+
+new Chart(document.getElementById('forecastChart'), {
+  type: 'line',
+  data: {
+    labels: forecastLabels,
+    datasets: [{
+      label: 'Projected savings',
+      data: forecastData,
+      borderColor: '#63D9B4',
+      backgroundColor: 'rgba(99,217,180,0.08)',
+      borderWidth: 2,
+      pointBackgroundColor: '#63D9B4',
+      pointRadius: 3,
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: c => ' $' + c.parsed.y.toFixed(2) }}
+    },
+    scales: {
+      x: {
+        ticks: { color: '#8FA3B0', font: { size: 10 }},
+        grid:  { color: 'rgba(255,255,255,0.04)' },
+        border:{ color: 'rgba(255,255,255,0.04)' }
+      },
+      y: {
+        ticks: { color: '#8FA3B0', font: { size: 10 }, callback: v => '$' + v },
+        grid:  { color: 'rgba(255,255,255,0.04)' },
+        border:{ color: 'rgba(255,255,255,0.04)' }
+      }
+    }
+  }
+});
+</script>
+{% endif %}
+
+<script>
+// Phase 12 — Load Wizzard AI tip on dashboard load
+fetch('/ai/tip')
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('wizTipText').textContent = data.tip;
+    document.getElementById('wizTipBanner').style.display = 'block';
+  })
+  .catch(() => {});
+</script>
+{% endblock %}

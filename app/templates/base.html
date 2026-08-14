@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}WalletWizzard{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Syne:wght@500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<nav class="topbar">
+  <div class="tb-left">
+    <div class="logo-nm">Wallet<span>Wizzard</span></div>
+    <div class="tb-nav">
+      <a href="{{ url_for('main.dashboard') }}"      class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a>
+      <a href="{{ url_for('income.index') }}"        class="{% if 'income' in request.endpoint %}active{% endif %}">Income</a>
+      <a href="{{ url_for('expense.index') }}"       class="{% if 'expense' in request.endpoint %}active{% endif %}">Expenses</a>
+      <a href="{{ url_for('subscription.index') }}"  class="{% if 'subscription' in request.endpoint %}active{% endif %}">Subscriptions</a>
+      <a href="{{ url_for('goal.index') }}"          class="{% if 'goal' in request.endpoint %}active{% endif %}">Goals</a>
+      <a href="{{ url_for('allocation.index') }}"    class="{% if 'allocation' in request.endpoint %}active{% endif %}">Allocation</a>
+      <a href="{{ url_for('report.index') }}"        class="{% if 'report' in request.endpoint %}active{% endif %}">Reports</a>
+      <a href="{{ url_for('ai.summary') }}"          class="{% if 'ai' in request.endpoint %}active{% endif %}" style="color:#63D9B4;">✦ Wizzard AI</a>
+    </div>
+  </div>
+  <div class="tb-right">
+    <div class="ai-badge">✦ AI active</div>
+    <div class="avatar">{{ current_user.username[:2].upper() }}</div>
+    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+  </div>
+</nav>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

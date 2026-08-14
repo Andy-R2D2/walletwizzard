@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Edit Expense — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:480px;">
+  <div class="page-header"><h1>Edit expense</h1></div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="POST" class="form-card">
+    <div class="field">
+      <label>Category</label>
+      <select name="category" required>
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if cat == expense.category %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>Actual amount ($)</label>
+      <input type="number" name="amount_actual" step="0.01" min="0.01" value="{{ expense.amount_actual }}" required/>
+    </div>
+    <div class="field">
+      <label>Planned amount ($)</label>
+      <input type="number" name="amount_planned" step="0.01" min="0" value="{{ expense.amount_planned or '' }}"/>
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" name="date" value="{{ expense.date }}"/>
+    </div>
+    <div class="field">
+      <label>Description (optional)</label>
+      <input type="text" name="description" value="{{ expense.description or '' }}"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:.5rem;">
+      <button type="submit" class="btn-auth" style="flex:1;">Update</button>
+      <a href="{{ url_for('expense.index') }}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

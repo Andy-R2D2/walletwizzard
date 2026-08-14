@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Income — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Income</h1>
+    <a href="{{ url_for('income.add') }}" class="btn-primary">+ Add income</a>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-item">
+      <div class="summary-label">Total income</div>
+      <div class="summary-val green">${{ "%.2f"|format(total) }}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Records</div>
+      <div class="summary-val">{{ incomes|length }}</div>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if incomes %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Date</th><th>Source</th><th>Description</th><th>Amount</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for i in incomes %}
+      <tr>
+        <td>{{ i.date }}</td>
+        <td>{{ i.source }}</td>
+        <td>{{ i.description or '—' }}</td>
+        <td class="green">${{ "%.2f"|format(i.amount) }}</td>
+        <td>
+          <a href="{{ url_for('income.edit', id=i.id) }}" class="btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('income.delete', id=i.id) }}" style="display:inline;">
+            <button type="submit" class="btn-sm danger" onclick="return confirm('Delete this income?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="empty-state">No income records yet. <a href="{{ url_for('income.add') }}">Add your first one</a>.</div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;"><a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a></div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Subscriptions — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Subscriptions</h1>
+    <a href="{{ url_for('subscription.add') }}" class="btn-primary">+ Add subscription</a>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-item">
+      <div class="summary-label">Monthly cost</div>
+      <div class="summary-val red">${{ "%.2f"|format(total) }}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Active</div>
+      <div class="summary-val">{{ count_active }}</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">Yearly cost</div>
+      <div class="summary-val">${{ "%.2f"|format(total * 12) }}</div>
+    </div>
+  </div>
+
+  {% if count_active > 5 %}
+  <div class="flash flash-error">You have {{ count_active }} active subscriptions. That may be hurting your savings goals.</div>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if subs %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Name</th><th>Amount</th><th>Billing</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for s in subs %}
+      <tr>
+        <td>{{ s.name }}</td>
+        <td>${{ "%.2f"|format(s.amount) }}</td>
+        <td>{{ s.billing }}</td>
+        <td>
+          {% if s.active %}
+            <span class="badge-ok">Active</span>
+          {% else %}
+            <span class="badge-over">Paused</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('subscription.toggle', id=s.id) }}" style="display:inline;">
+            <button type="submit" class="btn-sm">{{ 'Pause' if s.active else 'Resume' }}</button>
+          </form>
+          <a href="{{ url_for('subscription.edit', id=s.id) }}" class="btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('subscription.delete', id=s.id) }}" style="display:inline;">
+            <button type="submit" class="btn-sm danger" onclick="return confirm('Remove {{ s.name }}?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="empty-state">No subscriptions yet. <a href="{{ url_for('subscription.add') }}">Add your first one</a>.</div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;"><a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a></div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Add Income — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:480px;">
+  <div class="page-header"><h1>Add income</h1></div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="POST" class="form-card">
+    <div class="field">
+      <label>Source</label>
+      <input type="text" name="source" placeholder="Payroll, Freelance…" required/>
+    </div>
+    <div class="field">
+      <label>Amount ($)</label>
+      <input type="number" name="amount" step="0.01" min="0.01" placeholder="3000.00" required/>
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" name="date" value="{{ today }}"/>
+    </div>
+    <div class="field">
+      <label>Description (optional)</label>
+      <input type="text" name="description" placeholder="June paycheck…"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:.5rem;">
+      <button type="submit" class="btn-auth" style="flex:1;">Save income</button>
+      <a href="{{ url_for('income.index') }}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

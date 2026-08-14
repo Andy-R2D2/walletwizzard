@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Add Goal — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:480px;">
+  <div class="page-header">
+    <h1>Add goal</h1>
+    <span class="muted-link">{{ count }} / {{ max_goals }} goals used</span>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="POST" class="form-card">
+    <div class="field">
+      <label>Goal name</label>
+      <input type="text" name="name" placeholder="Buy a car, Pay debt…" required/>
+    </div>
+    <div class="field">
+      <label>Target amount ($)</label>
+      <input type="number" name="target_amount" step="0.01" min="1" placeholder="6000.00" required/>
+    </div>
+    <div class="field">
+      <label>Already saved ($) <span class="hint">optional — enter 0 to start fresh</span></label>
+      <input type="number" name="saved_amount" step="0.01" min="0" placeholder="0.00"/>
+    </div>
+    <div class="field">
+      <label>Target months</label>
+      <input type="number" name="target_months" min="1" max="360" placeholder="12" required/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:.5rem;">
+      <button type="submit" class="btn-auth" style="flex:1;">Create goal ✦</button>
+      <a href="{{ url_for('goal.index') }}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

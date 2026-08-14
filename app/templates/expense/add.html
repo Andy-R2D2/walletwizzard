@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Add Expense — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:500px;">
+  <div class="page-header"><h1>Add expense</h1></div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="POST" class="form-card">
+    <div class="field">
+      <label>Category</label>
+      <select name="category" id="catSelect" required onchange="updateBudgetInfo(this.value)">
+        <option value="">Select a category</option>
+        {% for name, icon in categories %}
+          <option value="{{ name }}">{{ icon }} {{ name }}</option>
+        {% endfor %}
+      </select>
+      <div id="budgetInfo" class="budget-info" style="display:none;"></div>
+    </div>
+    <div class="field">
+      <label>Amount spent ($)</label>
+      <input type="number" name="amount_actual" id="amountInput"
+             step="0.01" min="0.01" placeholder="150.00" required
+             oninput="updateBudgetInfo(document.getElementById('catSelect').value)"/>
+    </div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" name="date" value="{{ today }}"/>
+    </div>
+    <div class="field">
+      <label>Description (optional)</label>
+      <input type="text" name="description" placeholder="Groceries, dinner…"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:.5rem;">
+      <button type="submit" class="btn-auth" style="flex:1;">Save expense</button>
+      <a href="{{ url_for('expense.index') }}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+
+  <div style="margin-top:1rem;">
+    <a href="{{ url_for('budget.index') }}" class="muted-link">⚙ Manage monthly budgets</a>
+  </div>
+</div>
+
+<script>
+const budgetMap = {{ budget_map|tojson }};
+const spentMap  = {{ spent_map|tojson }};
+
+function updateBudgetInfo(cat) {
+  const box    = document.getElementById('budgetInfo');
+  const amount = parseFloat(document.getElementById('amountInput').value) || 0;
+
+  if (!cat || !budgetMap[cat]) {
+    box.style.display = 'none';
+    return;
+  }
+
+  const planned   = budgetMap[cat] || 0;
+  const spent     = spentMap[cat]  || 0;
+  const remaining = planned - spent - amount;
+  const pct       = planned > 0 ? Math.min(100, Math.round(((spent + amount) / planned) * 100)) : 0;
+
+  let color = '#63D9B4';
+  let msg   = '';
+
+  if (remaining < 0) {
+    color = '#FCA5A5';
+    msg = `⚠ Over budget by $${Math.abs(remaining).toFixed(2)}`;
+  } else if (pct >= 80) {
+    color = '#FCD34D';
+    msg = `$${remaining.toFixed(2)} remaining (${pct}% used)`;
+  } else {
+    msg = `$${remaining.toFixed(2)} remaining of $${planned.toFixed(2)} budget`;
+  }
+
+  box.style.display = 'block';
+  box.style.color   = color;
+  box.innerHTML     = `<div class="budget-bar-wrap"><div class="budget-bar-fill" style="width:${pct}%;background:${color};"></div></div>${msg}`;
+}
+</script>
+{% endblock %}

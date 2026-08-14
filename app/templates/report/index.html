@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Reports — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:580px;">
+
+  <div class="page-header">
+    <h1>Monthly report</h1>
+  </div>
+
+  <p style="color:#8FA3B0;font-size:13px;margin-bottom:1.5rem;line-height:1.65;">
+    Download your full financial report as a PDF. Includes your spending summary,
+    health score breakdown, budget vs actual, savings goals, 12-month forecast,
+    and a personalized AI analysis from Wizzard.
+  </p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">{{ now.strftime('%B %Y') }} report</div>
+      <div class="card-tag">PDF</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
+      <div class="report-item">📊 Monthly spending overview</div>
+      <div class="report-item">❤️ Financial health score breakdown</div>
+      <div class="report-item">🎯 Budget vs actual by category</div>
+      <div class="report-item">💰 Savings goals progress</div>
+      <div class="report-item">📈 12-month savings forecast</div>
+      <div class="report-item">✦ Wizzard AI personalized insights</div>
+    </div>
+
+    <a href="{{ url_for('report.download') }}" class="btn-auth"
+       style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;justify-content:center;width:100%;">
+      ⬇ Download PDF report
+    </a>
+    <p style="font-size:12px;color:#8FA3B0;margin-top:.75rem;text-align:center;">
+      Report is generated live from your current data.
+    </p>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a>
+  </div>
+</div>
+{% endblock %}

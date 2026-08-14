@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Sign in — WalletWizzard{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <svg width="38" height="38" viewBox="0 0 60 60" fill="none">
+        <rect x="4" y="4" width="52" height="52" rx="14" fill="#0F2A35" stroke="#63D9B4" stroke-width="1.2"/>
+        <rect x="14" y="22" width="32" height="22" rx="4" fill="none" stroke="#63D9B4" stroke-width="1.4"/>
+        <rect x="14" y="28" width="32" height="6" fill="#63D9B4" opacity="0.12"/>
+        <rect x="19" y="32" width="10" height="4" rx="2" fill="#63D9B4" opacity="0.7"/>
+        <circle cx="42" cy="33" r="3" fill="none" stroke="#63D9B4" stroke-width="1.2"/>
+        <line x1="30" y1="14" x2="30" y2="20" stroke="#63D9B4" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="30" cy="13" r="2" fill="#63D9B4" opacity="0.8"/>
+      </svg>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:600;color:#fff;">Wallet<span style="color:#63D9B4;">Wizzard</span></div>
+        <div style="font-size:11px;color:#8FA3B0;">Smart finance, simplified</div>
+      </div>
+    </div>
+
+    <div class="auth-sub">Sign in to your account</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required/>
+      </div>
+      <div class="field-row">
+        <label class="checkbox-label">
+          <input type="checkbox" name="remember"/> Remember me
+        </label>
+      </div>
+      <button type="submit" class="btn-auth">Sign in ✦</button>
+    </form>
+
+    <div class="auth-switch">
+      No account yet? <a href="{{ url_for('auth.register') }}">Register free</a>
+    </div>
+    <div class="auth-switch" style="margin-top:.4rem;">
+      <a href="{{ url_for('main.index') }}" style="color:#8FA3B0;font-size:12px;">← Back to home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

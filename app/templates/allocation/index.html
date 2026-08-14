@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Savings Allocation — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap" style="max-width:620px;">
+
+  <div class="page-header">
+    <h1>Savings allocation ✦</h1>
+  </div>
+
+  <div class="alloc-summary-bar">
+    <div>
+      <div class="summary-label">Available to allocate</div>
+      <div class="summary-val green">${{ "%.2f"|format(monthly_savings) }}</div>
+      <div style="font-size:11px;color:#8FA3B0;margin-top:2px;">
+        Income ${{ "%.2f"|format(summary.total_income) }} −
+        Expenses ${{ "%.2f"|format(summary.total_expense) }} −
+        Subscriptions ${{ "%.2f"|format(summary.sub_cost) }}
+      </div>
+    </div>
+  </div>
+
+  <p style="color:#8FA3B0;font-size:13px;margin-bottom:1.5rem;line-height:1.65;">
+    Assign a percentage of your monthly savings to each goal.
+    Total must not exceed <strong style="color:#fff;">100%</strong>.
+    Whatever is left is kept as <strong style="color:#63D9B4;">free cash</strong>.
+    Click <strong style="color:#fff;">Apply this month</strong> to transfer the amounts to your goals.
+  </p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if goals %}
+  <form method="POST" action="{{ url_for('allocation.index') }}">
+    <div class="alloc-list">
+      {% set total_current = namespace(pct=0) %}
+      {% for goal in goals %}
+        {% set total_current = namespace(pct=total_current.pct + goal.allocation_pct) %}
+        {% set monthly_amount = monthly_savings * goal.allocation_pct / 100 %}
+        <div class="alloc-card">
+          <div class="alloc-card-top">
+            <div>
+              <div class="alloc-goal-name">{{ goal.name }}</div>
+              <div style="font-size:11px;color:#8FA3B0;margin-top:2px;">
+                ${{ "%.2f"|format(goal.saved_amount) }} saved
+                of ${{ "%.2f"|format(goal.target_amount) }}
+                — {{ goal.progress_pct }}%
+              </div>
+            </div>
+            <div class="alloc-right">
+              <div class="alloc-amount green">
+                +${{ "%.2f"|format(monthly_amount) }}/mo
+              </div>
+            </div>
+          </div>
+
+          <!-- progress bar -->
+          <div class="goal-bar-wrap" style="margin:.6rem 0;">
+            <div class="goal-bar-fill" style="width:{{ goal.progress_pct }}%;"></div>
+          </div>
+
+          <!-- pct input -->
+          <div style="display:flex;align-items:center;gap:10px;margin-top:.5rem;">
+            <label style="font-size:12px;color:#8FA3B0;width:80px;">Allocation</label>
+            <input
+              type="number"
+              name="alloc_{{ goal.id }}"
+              value="{{ goal.allocation_pct|int }}"
+              min="0" max="100" step="1"
+              class="alloc-input"
+              oninput="updateTotals()"
+            />
+            <span style="color:#8FA3B0;font-size:13px;">%</span>
+            <span style="font-size:12px;color:#63D9B4;margin-left:auto;">
+              = $<span id="amt_{{ goal.id }}">{{ "%.2f"|format(monthly_amount) }}</span>
+            </span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- total bar -->
+    <div class="alloc-total-bar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+        <span style="font-size:13px;color:#C5D3DB;">Total allocated</span>
+        <span id="totalPctDisplay" style="font-size:16px;font-weight:600;color:#63D9B4;">
+          {{ total_current.pct|int }}%
+        </span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="totalBar" style="width:{{ [total_current.pct, 100]|min }}%;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:.35rem;font-size:11px;color:#8FA3B0;">
+        <span>0%</span>
+        <span id="freeCashDisplay">
+        Free cash: ${{ "%.2f"|format(monthly_savings * (100 - total_current.pct) / 100) }}
+        ({{ (100 - total_current.pct)|int }}%)
+      </span>
+        <span>100%</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:1rem;">
+      <button type="submit" class="btn-auth" style="flex:1;">Save allocations</button>
+    </div>
+  </form>
+
+  <!-- Apply button — separate form -->
+  <form method="POST" action="{{ url_for('allocation.apply') }}" style="margin-top:.75rem;">
+    <button type="submit" class="btn-primary" style="width:100%;padding:11px;font-size:14px;"
+            onclick="return confirm('Apply this month\'s allocation to your goals now? This adds the amounts to your saved totals.')">
+      ✦ Apply this month — transfer to goals
+    </button>
+  </form>
+
+  {% else %}
+    <div class="empty-state">
+      No active goals yet. <a href="{{ url_for('goal.add') }}">Add a goal first</a>.
+    </div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;">
+    <a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a>
+  </div>
+</div>
+
+<script>
+const monthlySavings = {{ monthly_savings }};
+const goalIds        = [{% for g in goals %}{{ g.id }}{% if not loop.last %},{% endif %}{% endfor %}];
+
+function updateTotals() {
+  let total = 0;
+
+  goalIds.forEach(id => {
+    const input  = document.querySelector(`input[name="alloc_${id}"]`);
+    const pct    = parseFloat(input?.value) || 0;
+    const amount = (monthlySavings * pct / 100).toFixed(2);
+    const amtEl  = document.getElementById(`amt_${id}`);
+    if (amtEl) amtEl.textContent = amount;
+    total += pct;
+  });
+
+  // Cap visual at 100
+  const capped   = Math.min(total, 100);
+  const freePct  = Math.max(0, 100 - total);
+  const freeCash = (monthlySavings * freePct / 100).toFixed(2);
+
+  document.getElementById('totalPctDisplay').textContent = total.toFixed(1) + '%';
+  document.getElementById('totalPctDisplay').style.color = total > 100 ? '#FCA5A5' : '#63D9B4';
+  document.getElementById('totalBar').style.width        = capped + '%';
+  document.getElementById('totalBar').style.background   = total > 100 ? '#FCA5A5' : '#63D9B4';
+  document.getElementById('freeCashDisplay').textContent =
+    `Free cash: $${freeCash} (${freePct.toFixed(1)}%)`;
+}
+
+// Run on load
+updateTotals();
+</script>
+{% endblock %}

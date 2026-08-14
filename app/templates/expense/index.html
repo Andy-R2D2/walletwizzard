@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Expenses — WalletWizzard{% endblock %}
+{% block content %}
+<div class="page-wrap">
+  <div class="page-header">
+    <h1>Expenses</h1>
+    <div style="display:flex;gap:10px;">
+      <a href="{{ url_for('budget.index') }}"  class="btn-cancel">⚙ Budgets</a>
+      <a href="{{ url_for('expense.add') }}"   class="btn-primary">+ Add expense</a>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-item">
+      <div class="summary-label">Total spent</div>
+      <div class="summary-val red">${{ "%.2f"|format(total_actual) }}</div>
+    </div>
+    {% for name, icon in categories %}
+      {% if budget_map.get(name) %}
+      <div class="summary-item">
+        <div class="summary-label">{{ icon }} {{ name }}</div>
+        <div class="summary-val {% if (spent_map.get(name,0)) > budget_map.get(name,0) %}red{% else %}green{% endif %}">
+          ${{ "%.2f"|format(spent_map.get(name, 0)) }}
+          <span style="font-size:12px;color:#8FA3B0;">/ ${{ "%.2f"|format(budget_map.get(name, 0)) }}</span>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if expenses %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for e in expenses %}
+      {% set planned = budget_map.get(e.category, 0) %}
+      {% set spent   = spent_map.get(e.category, 0) %}
+      <tr>
+        <td>{{ e.date }}</td>
+        <td>
+          {% for name, icon in categories %}
+            {% if name == e.category %}{{ icon }}{% endif %}
+          {% endfor %}
+          {{ e.category }}
+        </td>
+        <td>{{ e.description or '—' }}</td>
+        <td class="red">${{ "%.2f"|format(e.amount_actual) }}</td>
+        <td>
+          {% if planned > 0 %}
+            {% if spent > planned %}
+              <span class="badge-over">Over budget</span>
+            {% else %}
+              <span class="badge-ok">Within budget</span>
+            {% endif %}
+          {% else %}
+            <span style="color:#8FA3B0;font-size:12px;">No budget set</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{{ url_for('expense.edit', id=e.id) }}" class="btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('expense.delete', id=e.id) }}" style="display:inline;">
+            <button type="submit" class="btn-sm danger"
+                    onclick="return confirm('Delete this expense?')">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="empty-state">No expenses yet. <a href="{{ url_for('expense.add') }}">Add your first one</a>.</div>
+  {% endif %}
+
+  <div style="margin-top:1.5rem;">
+    <a href="{{ url_for('main.dashboard') }}" class="muted-link">← Back to dashboard</a>
+  </div>
+</div>
+{% endblock %}
