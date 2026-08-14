@@ -18,7 +18,17 @@ def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
 
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///walletwizzard.db')
+
+    # Handle all possible DATABASE_URL formats from Railway
+    db_url = os.getenv('DATABASE_URL', 'sqlite:///walletwizzard.db')
+    if db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql+psycopg2://', 1)
+    elif db_url.startswith('postgresql://'):
+        db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://', 1)
+    elif db_url.startswith('mysql://'):
+        db_url = db_url.replace('mysql://', 'mysql+mysqlclient://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
