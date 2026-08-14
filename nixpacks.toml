@@ -1,0 +1,2 @@
+[start]
+cmd = "flask db upgrade && gunicorn run:app"
