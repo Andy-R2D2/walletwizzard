@@ -3,6 +3,7 @@ from openai import OpenAI
 from app.services.rules        import get_monthly_summary, get_savings_forecast
 from app.services.health_score import compute_health_score
 
+
 def get_client():
     key = os.getenv('OPENAI_API_KEY')
     if not key:
